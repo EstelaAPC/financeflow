@@ -26,7 +26,7 @@ The interface is designed around a modern fintech aesthetic, featuring a dark na
 
 > The deployment is still being validated. If the demo is unavailable, the hosting configuration may still need adjustment.
 
-## 🏗️ Architecture
+##  Architecture
 
 <p align="center">
   <img
