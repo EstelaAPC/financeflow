@@ -1,0 +1,114 @@
+<section class="reports-page">
+  <header class="reports-heading">
+    <div>
+      <p class="reports-eyebrow">Análise financeira</p>
+      <p class="reports-intro">Entenda para onde seu dinheiro está indo, com base nas transações registradas.</p>
+    </div>
+    <div class="month-switcher" aria-label="Selecionar mês do relatório">
+      <button type="button" aria-label="Mês anterior" (click)="previousMonth()">‹</button>
+      <strong>{{ selectedMonthLabel }}</strong>
+      <button type="button" aria-label="Próximo mês" [disabled]="monthOffset === 0" (click)="nextMonth()">›</button>
+    </div>
+  </header>
+
+  @if (!loading) {
+    @if (isDemoMode) {
+      <aside class="data-source-banner demo" role="status">
+        <span class="data-source-badge">DEMO</span>
+        <div>
+          <strong>{{ apiUnavailable ? 'Modo de demonstração' : 'Dados fictícios para demonstração' }}</strong>
+          <p>
+            @if (apiUnavailable) {
+              Não foi possível carregar os dados da API. Os relatórios usam somente dados fictícios.
+            } @else if (apiEmpty) {
+              Ainda não existem transações reais cadastradas. Os relatórios exibem dados fictícios.
+            } @else {
+              Relatórios calculados com dados fictícios, sem mistura com transações reais.
+            }
+          </p>
+        </div>
+        <button type="button" class="data-source-retry" (click)="retry()">Tentar reconectar</button>
+      </aside>
+    }
+  }
+
+  @if (loading) {
+    <div class="report-loading" role="status">Carregando seus relatórios...</div>
+  } @else if (error) {
+    <div class="report-error" role="alert">
+      <strong>Não foi possível carregar os relatórios</strong>
+      <p>{{ error }}</p>
+      <button type="button" (click)="retry()">Tentar novamente</button>
+    </div>
+  } @else {
+    <div class="report-summary">
+      <article class="report-total net">
+        <span>Resultado do mês</span>
+        <strong>{{ formatCurrency(balance) }}</strong>
+        <small>{{ balance >= 0 ? 'Receitas acima das despesas' : 'Despesas acima das receitas' }}</small>
+      </article>
+      <article class="report-total">
+        <span>Receitas</span>
+        <strong>{{ formatCurrency(income) }}</strong>
+        <small>{{ monthTransactions.length }} movimentações no período</small>
+      </article>
+      <article class="report-total expense">
+        <span>Despesas</span>
+        <strong>{{ formatCurrency(expense) }}</strong>
+        <small>Valores das despesas registradas</small>
+      </article>
+    </div>
+
+    <div class="report-grid">
+      <article class="report-panel trend-panel">
+        <header>
+          <div>
+            <span class="reports-eyebrow">Últimos seis meses</span>
+            <h2>Receitas e despesas</h2>
+          </div>
+          <div class="chart-legend"><span class="legend-income"></span> Receitas <span class="legend-expense"></span> Despesas</div>
+        </header>
+        <p class="trend-context">
+          O gráfico mostra somente os valores registrados em cada mês, sem estimativas para períodos vazios.
+        </p>
+        @if (transactions.length === 0) {
+          <div class="report-empty">Adicione transações para visualizar a evolução mensal.</div>
+        } @else {
+          <div class="trend-chart" role="img" [attr.aria-label]="'Comparação mensal de receitas e despesas nos seis meses até ' + selectedMonthLabel">
+            @for (point of monthlyTrend; track point.key) {
+              <div class="trend-month">
+                <div class="trend-bars">
+                  <span class="trend-bar income-bar" [style.height.%]="(point.income / maxTrendValue) * 100" [title]="'Receitas: ' + formatCurrency(point.income)"></span>
+                  <span class="trend-bar expense-bar" [style.height.%]="(point.expense / maxTrendValue) * 100" [title]="'Despesas: ' + formatCurrency(point.expense)"></span>
+                </div>
+                <small>{{ point.label }}</small>
+              </div>
+            }
+          </div>
+        }
+      </article>
+
+      <article class="report-panel category-panel">
+        <header>
+          <div>
+            <span class="reports-eyebrow">Onde você gastou</span>
+            <h2>Despesas por categoria</h2>
+          </div>
+        </header>
+        @if (categoryTotals.length === 0) {
+          <div class="report-empty">Não há despesas neste mês para detalhar.</div>
+        } @else {
+          <div class="category-report-list">
+            @for (item of categoryTotals; track item.category) {
+              <div class="category-report">
+                <div><strong>{{ item.category }}</strong><span>{{ item.share | number: '1.0-0' }}%</span></div>
+                <div class="category-report-track"><span [style.width.%]="item.share"></span></div>
+                <small>{{ formatCurrency(item.amount) }}</small>
+              </div>
+            }
+          </div>
+        }
+      </article>
+    </div>
+  }
+</section>

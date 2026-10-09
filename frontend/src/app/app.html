@@ -1,0 +1,71 @@
+@if (isLoginPage) {
+  <router-outlet />
+} @else {
+  <div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <a class="brand-wrap" routerLink="/dashboard" aria-label="FinanceFlow, ir para visão geral">
+        <img class="brand-mark" src="/financeflow-mark.svg" alt="" />
+        <div class="brand-copy">
+          <strong>FinanceFlow</strong>
+          <span>Seu espaço financeiro</span>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Menu principal">
+        @for (item of navItems; track item.path) {
+          <a
+            class="nav-item"
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+          >
+            <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="visitor-indicator"><span></span> Acesso visitante</span>
+        <button
+          type="button"
+          class="logout-button"
+          aria-label="Sair e voltar à tela inicial"
+          (click)="signOut()"
+        >
+          <span aria-hidden="true">⇥</span>
+          <span>Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="content-panel">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="menu-toggle" aria-label="Abrir menu" (click)="toggleSidebar()">☰</button>
+          <div>
+            <p class="eyebrow">{{ greeting }} <span class="visitor-badge">Visitante</span></p>
+            <h1>{{ currentPageTitle }}</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button
+            type="button"
+            class="theme-toggle"
+            [attr.aria-label]="themeService.isDark() ? 'Ativar tema claro' : 'Ativar tema escuro'"
+            (click)="themeService.toggle()"
+          >
+            <span aria-hidden="true">{{ themeService.isDark() ? '☀' : '◐' }}</span>
+            <span>{{ themeService.isDark() ? 'Tema claro' : 'Tema escuro' }}</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+  <app-quick-actions />
+}

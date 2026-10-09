@@ -1,0 +1,127 @@
+<section class="budgets-page">
+  <header class="budgets-heading">
+    <div>
+      <p class="budgets-eyebrow">Planejamento pessoal</p>
+      <p class="budgets-intro">Defina limites por categoria e acompanhe o realizado com suas despesas reais.</p>
+    </div>
+    <div class="month-switcher" aria-label="Selecionar mês do orçamento">
+      <button type="button" aria-label="Mês anterior" (click)="previousMonth()">‹</button>
+      <strong>{{ monthLabel }}</strong>
+      <button type="button" aria-label="Próximo mês" [disabled]="monthOffset === 0" (click)="nextMonth()">›</button>
+    </div>
+  </header>
+
+  <p class="local-notice" role="note">
+    Seus limites são salvos somente neste navegador e não são enviados à API nem sincronizados com outros dispositivos.
+  </p>
+
+  @if (!loading) {
+    @if (isDemoMode) {
+      <aside class="data-source-banner demo" role="status">
+        <span class="data-source-badge">DEMO</span>
+        <div>
+          <strong>{{ apiUnavailable ? 'Modo de demonstração' : 'Dados fictícios para demonstração' }}</strong>
+          <p>
+            @if (apiUnavailable) {
+              Não foi possível carregar as despesas da API. Os cálculos usam somente dados fictícios.
+            } @else if (apiEmpty) {
+              Ainda não existem transações reais cadastradas. Os cálculos usam dados fictícios.
+            } @else {
+              Os valores exibidos são fictícios e não representam despesas reais.
+            }
+          </p>
+        </div>
+        <button type="button" class="data-source-retry" (click)="retry()">Tentar reconectar</button>
+      </aside>
+    }
+  }
+
+  @if (budgetError) {
+    <p class="budget-error" role="alert">{{ budgetError }}</p>
+  }
+
+  @if (loading) {
+    <div class="budgets-state" role="status">Carregando despesas...</div>
+  } @else if (error) {
+    <div class="budgets-state error-state" role="alert">
+      <strong>Não foi possível calcular seus orçamentos</strong>
+      <p>{{ error }}</p>
+      <button type="button" (click)="retry()">Tentar novamente</button>
+    </div>
+  } @else {
+    <div class="budget-summary">
+      <article><span>Despesas no mês</span><strong>{{ formatCurrency(monthlyExpenses) }}</strong></article>
+      <article><span>Limites definidos</span><strong>{{ formatCurrency(totalBudget) }}</strong></article>
+      <article><span>Disponível nos limites</span><strong [class.over-budget]="totalRemaining < 0">{{ formatCurrency(totalRemaining) }}</strong></article>
+    </div>
+
+    <div class="budget-layout">
+      <section class="budget-list-panel">
+        <header class="budget-panel-heading">
+          <div><span class="budgets-eyebrow">Controle por categoria</span><h2>Seus limites</h2></div>
+          <span class="budget-count">{{ monthBudgets.length }} {{ monthBudgets.length === 1 ? 'categoria' : 'categorias' }}</span>
+        </header>
+
+        @if (monthBudgets.length === 0) {
+          <div class="budget-empty">
+            <span class="empty-mark" aria-hidden="true">＋</span>
+            <strong>Comece com um limite simples</strong>
+            <p>Escolha uma categoria e um valor mensal para acompanhar seus gastos.</p>
+          </div>
+        } @else {
+          <div class="budget-cards">
+            @for (budget of monthBudgets; track budget.id) {
+              <article class="budget-card" [class.exceeded]="budget.remaining < 0">
+                <div class="budget-card-top">
+                  <div><strong>{{ budget.category }}</strong><small>{{ formatCurrency(budget.spent) }} usados de {{ formatCurrency(budget.limit) }}</small></div>
+                  @if (pendingDeleteId === budget.id) {
+                    <div class="delete-confirm">
+                      <button type="button" (click)="confirmDelete(budget.id)">Confirmar</button>
+                      <button type="button" class="cancel-delete" (click)="cancelDelete()">Cancelar</button>
+                    </div>
+                  } @else {
+                    <button type="button" class="remove-budget" [attr.aria-label]="'Remover limite de ' + budget.category" (click)="pendingDeleteId = budget.id">Remover</button>
+                  }
+                </div>
+                <div class="budget-track" role="progressbar" [attr.aria-label]="'Uso do limite de ' + budget.category" aria-valuemin="0" [attr.aria-valuemax]="budget.limit" [attr.aria-valuenow]="Math.min(budget.spent, budget.limit)" [attr.aria-valuetext]="formatCurrency(budget.spent) + ' gastos de ' + formatCurrency(budget.limit)">
+                  <span [style.width.%]="budget.percent"></span>
+                </div>
+                <div class="budget-card-bottom">
+                  <span>{{ budget.remaining >= 0 ? 'Restante' : 'Acima do limite' }}</span>
+                  <strong>{{ formatCurrency(budget.remaining < 0 ? -budget.remaining : budget.remaining) }}</strong>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        @if (unbudgetedCategories.length > 0) {
+          <div class="unbudgeted">
+            <span class="budgets-eyebrow">Sem limite definido neste mês</span>
+            <div>
+              @for (category of unbudgetedCategories; track category) {
+                <button type="button" (click)="startBudgetFor(category)">{{ category }} <span>+</span></button>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <aside class="budget-form-panel">
+        <span class="budgets-eyebrow">Novo limite</span>
+        <h2>Planeje uma categoria</h2>
+        <p>O limite vale para {{ monthLabel }}. Se já existir um para a categoria, ele será atualizado.</p>
+        <form (ngSubmit)="saveBudget()">
+          <label for="budget-category">Categoria</label>
+          <input id="budget-category" name="category" [(ngModel)]="category" maxlength="80" required placeholder="Ex.: Alimentação" />
+          <label for="budget-limit">Limite mensal (R$)</label>
+          <input id="budget-limit" name="limit" [(ngModel)]="limit" type="number" min="0.01" step="0.01" required placeholder="0,00" />
+          <button type="submit" [disabled]="saving || !category.trim() || !limit || limit <= 0">
+            {{ saving ? 'Salvando...' : 'Salvar limite' }}
+          </button>
+        </form>
+        <div class="budget-footnote"><span aria-hidden="true">i</span> Os limites não alteram suas transações nem representam aconselhamento financeiro.</div>
+      </aside>
+    </div>
+  }
+</section>

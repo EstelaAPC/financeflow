@@ -1,0 +1,217 @@
+<section class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="page-subtitle">Acompanhe o seu fluxo com clareza e precisão.</p>
+    </div>
+
+    <div class="page-actions">
+      <div class="period-toggle" role="group" aria-label="Período dos dados financeiros">
+        <button type="button" [class.active]="selectedPeriod === '30d'" [attr.aria-pressed]="selectedPeriod === '30d'" (click)="selectedPeriod = '30d'">
+          Últimos 30 dias
+        </button>
+        <button type="button" [class.active]="selectedPeriod === 'month'" [attr.aria-pressed]="selectedPeriod === 'month'" (click)="selectedPeriod = 'month'">
+          Este mês
+        </button>
+      </div>
+      <a class="dashboard-create-button" routerLink="/transactions" [queryParams]="{ mode: 'create' }">
+        Nova transação
+      </a>
+    </div>
+  </header>
+
+  @if (!loading) {
+    @if (isDemoMode) {
+      <aside class="data-source-banner demo" role="status">
+        <span class="data-source-badge">DEMO</span>
+        <div>
+          <strong>{{ apiUnavailable ? 'Modo de demonstração' : 'Dados fictícios para demonstração' }}</strong>
+          <p>
+            @if (apiUnavailable) {
+              {{ 'Modo de demonstração — não foi possível carregar os dados da API.' }}
+            } @else if (apiEmpty) {
+              Ainda não existem transações reais cadastradas. Estes dados fictícios mantêm a demonstração do dashboard.
+            } @else {
+              Estes dados são fictícios e não representam transações reais.
+            }
+          </p>
+        </div>
+        <button type="button" class="data-source-retry" (click)="retryLoadTransactions()">Tentar reconectar</button>
+      </aside>
+    }
+  }
+
+  @if (loading) {
+    <div class="skeleton-grid" aria-live="polite" aria-label="Carregando dados financeiros">
+      <div class="skeleton-card wide"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card chart"></div>
+      <div class="skeleton-card chart"></div>
+      <div class="skeleton-card large"></div>
+    </div>
+  } @else if (error) {
+    <div class="state-card error" role="alert">
+      <h2>Não foi possível atualizar o resumo</h2>
+      <p>{{ error }}</p>
+      <button type="button" class="retry-button" (click)="retryLoadTransactions()">Tentar novamente</button>
+    </div>
+  } @else {
+    @if (visibleTransactions.length === 0 && outsidePeriodCount > 0) {
+      <p class="period-notice" role="status">
+        Nenhuma transação no período selecionado. Há {{ outsidePeriodCount }}
+        {{ outsidePeriodCount === 1 ? 'transação' : 'transações' }} em outras datas.
+      </p>
+    }
+
+    <div class="summary-grid">
+      <article class="summary-card balance">
+        <div class="card-topline">
+          <span>Saldo líquido</span>
+          <span class="icon-wrap">↗</span>
+        </div>
+        <h2>{{ formatCurrency(summary.balance) }}</h2>
+        <p>Resultado consolidado do período.</p>
+      </article>
+
+      <article class="summary-card income">
+        <div class="card-topline">
+          <span>Receitas</span>
+          <span class="icon-wrap">+</span>
+        </div>
+        <h2>{{ formatCurrency(summary.income) }}</h2>
+        <p>Entradas do período selecionado.</p>
+      </article>
+
+      <article class="summary-card expense">
+        <div class="card-topline">
+          <span>Despesas</span>
+          <span class="icon-wrap">−</span>
+        </div>
+        <h2>{{ formatCurrency(summary.expense) }}</h2>
+        <p>Saídas do período selecionado.</p>
+      </article>
+
+      <article class="summary-card savings">
+        <div class="card-topline">
+          <span>Economia</span>
+          <span class="icon-wrap">◎</span>
+        </div>
+        <h2>{{ formatCurrency(summary.savings) }}</h2>
+        <p>Diferença líquida entre entradas e saídas.</p>
+      </article>
+    </div>
+
+    <div class="content-grid">
+      <article class="panel chart-panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-tag">Fluxo</span>
+            <h2>Receitas versus despesas</h2>
+          </div>
+        </div>
+
+        @if (visibleTransactions.length === 0) {
+          <div class="empty-state inline">
+            <p>Mais transações são necessárias para exibir a evolução do saldo.</p>
+          </div>
+        } @else if (trendPoints.length < 2) {
+          <div class="empty-state inline">
+            <p>Há apenas uma data disponível para essa comparação.</p>
+          </div>
+        } @else {
+          <svg class="bars-chart" viewBox="0 0 400 200" preserveAspectRatio="none" aria-label="Gráfico de receitas e despesas por data">
+            <g>
+              @for (point of trendPoints; track point.label; let i = $index) {
+                <rect
+                  [attr.x]="26 + i * 32"
+                  [attr.y]="160 - ((point.value + 120) / 4)"
+                  [attr.width]="18"
+                  [attr.height]="Math.max(10, ((point.value + 120) / 4))"
+                  [attr.fill]="point.value >= 0 ? '#35d49a' : '#ff7a7a'"
+                  rx="6"
+                ></rect>
+              }
+            </g>
+          </svg>
+        }
+      </article>
+
+      <article class="panel categories-panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-tag">Categorias</span>
+            <h2>Despesas por categoria</h2>
+          </div>
+        </div>
+
+        @if (expenseBreakdown.length === 0) {
+          <div class="empty-state inline">
+            <p>Não há despesas registradas para calcular a distribuição.</p>
+          </div>
+        } @else {
+          <div class="category-list">
+            @for (item of expenseBreakdown.slice(0, 5); track item.category) {
+              <div class="category-row">
+                <div class="category-meta">
+                  <span class="legend-dot" [style.background]="'#ff7a7a'"></span>
+                  <span>{{ item.category }}</span>
+                </div>
+                <strong>{{ formatCurrency(item.total) }}</strong>
+              </div>
+              <div class="progress-track">
+                <span [style.width.%]="(item.total / maxExpenseValue) * 100"></span>
+              </div>
+            }
+          </div>
+        }
+      </article>
+
+      <article class="panel recent-panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-tag">Movimentações</span>
+            <h2>Transações recentes</h2>
+          </div>
+          <a class="text-link" routerLink="/transactions">Ver todas</a>
+        </div>
+
+        @if (recentTransactions.length === 0) {
+          <div class="empty-state inline">
+            <p>Nenhuma transação encontrada no período atual.</p>
+          </div>
+        } @else {
+          <div class="transaction-list">
+            @for (transaction of recentTransactions; track transaction.id) {
+              <div class="transaction-row">
+                <div>
+                  <strong>{{ transaction.description }}</strong>
+                  <small>{{ transaction.category }}</small>
+                </div>
+                <div class="transaction-meta">
+                  <span class="pill" [class.income]="transaction.type === 'Income'" [class.expense]="transaction.type === 'Expense'">
+                    {{ transaction.type === 'Income' ? 'Receita' : 'Despesa' }}
+                  </span>
+                  <strong [class.positive]="transaction.type === 'Income'" [class.negative]="transaction.type === 'Expense'">
+                    {{ transaction.type === 'Income' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
+                  </strong>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </article>
+
+      <aside class="panel fin-panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-tag">Assistente</span>
+            <h2>Fin</h2>
+          </div>
+        </div>
+
+        <app-fin-mascot [mood]="finMood" [message]="finMessage"></app-fin-mascot>
+      </aside>
+    </div>
+  }
+</section>

@@ -1,0 +1,41 @@
+<div class="fin-wrap" [ngClass]="[mood, compact ? 'compact' : '']">
+  <svg
+    viewBox="0 0 200 180"
+    class="fin-svg"
+    [class.compact]="compact"
+    role="img"
+    [attr.aria-hidden]="compact ? 'true' : null"
+    [attr.aria-label]="compact ? null : 'Mascote Fin do FinanceFlow'"
+  >
+    <defs>
+      <linearGradient id="finBody" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#62f0b6" />
+        <stop offset="100%" stop-color="#2ec88d" />
+      </linearGradient>
+    </defs>
+
+    <g class="fin-shape">
+      <path class="fin-tail" d="M120 116c18 3 31 17 34 31-20 6-39 2-53-12 6-8 12-15 19-19z" />
+      <path class="fin-body" d="M60 88c0-29 20-53 49-53s49 24 49 53v17c0 25-17 45-41 52l-15 5-15-5c-24-7-41-27-41-52V88z" fill="url(#finBody)" />
+      <path class="fin-gill fin-gill-1" d="M79 90c-8-8-13-18-14-27" />
+      <path class="fin-gill fin-gill-2" d="M95 91c-7-10-10-20-9-31" />
+      <path class="fin-gill fin-gill-3" d="M111 91c6-11 9-21 8-31" />
+      <path class="fin-gill fin-gill-4" d="M130 90c8-9 13-19 15-28" />
+      <ellipse class="fin-eye" cx="87" cy="89" rx="8" ry="10" />
+      <ellipse class="fin-eye" cx="116" cy="89" rx="8" ry="10" />
+      <circle class="fin-pupil" cx="87" cy="89" r="3.2" />
+      <circle class="fin-pupil" cx="116" cy="89" r="3.2" />
+      <path class="fin-smile" d="M87 110c7 8 18 10 27 2" />
+      <path class="fin-belly" d="M76 123c18 12 31 16 47 0" />
+      <path class="fin-fin" d="M61 107c-14 11-22 25-22 39 18-2 30-10 37-26l-15-13z" />
+      <path class="fin-fin alt" d="M139 106c16 11 25 25 26 39-18-2-31-10-38-26l12-13z" />
+    </g>
+  </svg>
+
+  @if (!compact) {
+    <div class="fin-message" aria-live="polite">
+      <span class="fin-badge">Fin</span>
+      <p>{{ message }}</p>
+    </div>
+  }
+</div>

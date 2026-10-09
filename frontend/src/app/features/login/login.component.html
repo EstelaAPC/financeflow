@@ -1,0 +1,64 @@
+<main class="login-page">
+  <div class="login-orb orb-one" aria-hidden="true"></div>
+  <div class="login-orb orb-two" aria-hidden="true"></div>
+
+  <header class="login-topbar">
+    <a class="login-brand" routerLink="/login" aria-label="FinanceFlow">
+      <img src="/financeflow-mark.svg" alt="" />
+      <span>Finance<span>Flow</span></span>
+    </a>
+    <span class="demo-pill"><span></span> Ambiente demonstrativo</span>
+  </header>
+
+  <section class="login-layout">
+    <div class="login-story">
+      <p class="login-kicker"><span></span> Suas finanças, em movimento</p>
+      <h1>Mais clareza para<br />cada <em>próximo passo.</em></h1>
+      <p class="login-description">Um espaço simples para acompanhar entradas, despesas e escolhas do dia a dia.</p>
+
+      <div class="login-preview" aria-label="Prévia da experiência FinanceFlow">
+        <div class="preview-top">
+          <span class="preview-dot"></span>
+          <span>VISÃO DO SEU FLUXO</span>
+          <span class="preview-more">···</span>
+        </div>
+        <div class="preview-label">Saldo do período</div>
+        <strong class="preview-value">Um passo de cada vez</strong>
+        <div class="preview-line"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="preview-legend"><span><i></i> Entradas</span><span><i></i> Saídas</span></div>
+      </div>
+
+      <div class="login-trust"><span aria-hidden="true">✦</span><p>Uma experiência financeira mais leve começa com uma visão clara.</p></div>
+    </div>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <a class="login-card-brand" routerLink="/login" aria-label="FinanceFlow">
+        <img src="/financeflow-mark.svg" alt="" />
+      </a>
+      <p class="login-card-eyebrow">{{ mode === 'login' ? 'BEM-VINDA(O) AO FINANCEFLOW' : 'COMECE PELO FINANCEFLOW' }}</p>
+      <h2 id="login-title">{{ mode === 'login' ? 'Entre no seu espaço' : 'Crie seu espaço' }}</h2>
+      <p class="login-card-intro">
+        {{ mode === 'login' ? 'A autenticação ainda não está disponível.' : 'O cadastro ainda não está disponível.' }}
+        Esta tela é uma demonstração visual.
+      </p>
+
+      <div class="auth-unavailable" role="status">
+        <span aria-hidden="true">ⓘ</span>
+        <p>Não digite credenciais: login e cadastro não estão conectados e nenhum dado será coletado ou armazenado.</p>
+      </div>
+
+      <button type="button" class="guest-button" (click)="continueAsGuest()">
+        Continuar como visitante <span aria-hidden="true">↗</span>
+      </button>
+      <p class="guest-caption">Acesse o FinanceFlow sem criar conta. As transações são carregadas da API compartilhada.</p>
+
+      @if (mode === 'login') {
+        <p class="mode-switch">Ainda não tem conta? <button type="button" (click)="setMode('register')">Cadastre-se</button></p>
+      } @else {
+        <p class="mode-switch">Já conhece o FinanceFlow? <button type="button" (click)="setMode('login')">Voltar</button></p>
+      }
+    </section>
+  </section>
+
+  <footer class="login-footer"><span>FinanceFlow</span><span>Organize hoje. Enxergue o amanhã.</span></footer>
+</main>

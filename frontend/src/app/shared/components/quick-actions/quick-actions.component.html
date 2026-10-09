@@ -1,0 +1,29 @@
+<div class="quick-actions">
+  @if (expanded()) {
+    <nav id="quick-actions-panel" class="quick-actions-menu" aria-label="Atalhos rápidos">
+      <span class="quick-actions-caption">O que você precisa?</span>
+      <a routerLink="/transactions" [queryParams]="{ mode: 'create' }" (click)="close()">
+        <span class="quick-action-icon income-action" aria-hidden="true">＋</span>
+        <span><strong>Nova transação</strong><small>Registre uma entrada ou saída</small></span>
+      </a>
+      <a routerLink="/reports" (click)="close()">
+        <span class="quick-action-icon report-action" aria-hidden="true">⌁</span>
+        <span><strong>Ver relatórios</strong><small>Explore seu fluxo financeiro</small></span>
+      </a>
+      <a routerLink="/budgets" (click)="close()">
+        <span class="quick-action-icon budget-action" aria-hidden="true">◎</span>
+        <span><strong>Planejar orçamento</strong><small>Acompanhe limites por categoria</small></span>
+      </a>
+    </nav>
+  }
+  <button
+    type="button"
+    class="quick-actions-trigger"
+    [attr.aria-expanded]="expanded()"
+    aria-controls="quick-actions-panel"
+    [attr.aria-label]="expanded() ? 'Fechar atalhos' : 'Abrir atalhos rápidos'"
+    (click)="toggle()"
+  >
+    <app-fin-mascot class="quick-fin" [compact]="true" [mood]="expanded() ? 'positive' : 'welcome'" />
+  </button>
+</div>

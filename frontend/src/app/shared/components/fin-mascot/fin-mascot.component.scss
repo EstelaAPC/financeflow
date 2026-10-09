@@ -1,0 +1,150 @@
+.fin-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 148px;
+  border: 1px solid rgba(155, 170, 192, 0.2);
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, rgba(53, 212, 154, 0.08), rgba(17, 28, 46, 0.75));
+  padding: 0.85rem 1rem;
+  transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.fin-wrap.compact {
+  min-height: 0;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.fin-wrap:hover {
+  transform: translateY(-1px);
+  border-color: rgba(53, 212, 154, 0.32);
+}
+
+.fin-svg {
+  width: 104px;
+  height: 104px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.fin-svg.compact {
+  width: 3.9rem;
+  height: 3.9rem;
+}
+
+.fin-shape {
+  transform-origin: center;
+  animation: bob 4s ease-in-out infinite;
+}
+
+.fin-wrap.positive .fin-shape {
+  animation-duration: 3.2s;
+}
+
+.fin-wrap.warning .fin-shape {
+  animation-duration: 2.6s;
+}
+
+.fin-wrap.loading .fin-shape {
+  animation: pulse 1.4s ease-in-out infinite alternate;
+}
+
+.fin-tail,
+.fin-body,
+.fin-fin,
+.fin-belly {
+  filter: drop-shadow(0 10px 10px rgba(17, 28, 46, 0.28));
+}
+
+.fin-body {
+  stroke: rgba(13, 53, 38, 0.24);
+  stroke-width: 2;
+}
+
+.fin-gill {
+  fill: none;
+  stroke: rgba(17, 28, 46, 0.28);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fin-eye {
+  fill: #f4f7fb;
+  stroke: rgba(11, 18, 32, 0.55);
+  stroke-width: 1.4;
+}
+
+.fin-pupil {
+  fill: #0b1220;
+}
+
+.fin-smile,
+.fin-belly {
+  fill: none;
+  stroke: rgba(9, 25, 35, 0.72);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fin-fin {
+  fill: rgba(70, 184, 130, 0.78);
+}
+
+.fin-fin.alt {
+  fill: rgba(31, 136, 95, 0.74);
+}
+
+.fin-message {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.fin-badge {
+  width: fit-content;
+  border: 1px solid rgba(53, 212, 154, 0.32);
+  background: rgba(53, 212, 154, 0.12);
+  color: #91f0c5;
+  border-radius: 999px;
+  padding: 0.24rem 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fin-message p {
+  margin: 0;
+  color: #dfeaf7;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.98); }
+  100% { transform: scale(1.02); }
+}
+
+@media (max-width: 640px) {
+  .fin-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fin-shape {
+    animation: none;
+  }
+
+  .fin-wrap {
+    transition: none;
+  }
+}
