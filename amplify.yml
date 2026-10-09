@@ -1,0 +1,40 @@
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - |
+              set -eu
+              if ! command -v tar >/dev/null 2>&1 || ! command -v gzip >/dev/null 2>&1; then
+                if command -v dnf >/dev/null 2>&1; then
+                  dnf install -y tar gzip
+                elif command -v yum >/dev/null 2>&1; then
+                  yum install -y tar gzip
+                else
+                  echo "tar, gzip, and a supported package manager are required to install Node.js." >&2
+                  exit 1
+                fi
+              fi
+              node_root=/tmp/financeflow-node-v24.19.0
+              archive=/tmp/node-v24.19.0-linux-x64.tar.gz
+              mkdir -p "$node_root"
+              curl --fail --show-error --location --retry 5 --retry-all-errors --retry-delay 2 https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.gz -o "$archive"
+              printf '%s  %s\n' 'f625d97cd707df4ff96254916fbc5ff014f09c09effe5a1e0ca8f6d41a8789d4' "$archive" | sha256sum --check -
+              tar -xzf "$archive" --strip-components=1 -C "$node_root"
+              export PATH="$node_root/bin:$PATH"
+              test "$(node --version)" = "v24.19.0"
+              node --version
+              npm ci
+        build:
+          commands:
+            - |
+              export PATH="/tmp/financeflow-node-v24.19.0/bin:$PATH"
+              test "$(node --version)" = "v24.19.0"
+              node --version
+              npm run build
+      artifacts:
+        baseDirectory: dist/frontend
+        files:
+          - '**/*'
