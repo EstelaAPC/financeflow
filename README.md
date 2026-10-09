@@ -30,7 +30,7 @@ The interface is designed around a modern fintech aesthetic, featuring a dark na
 
 <p align="center">
   <img
-    src="./financeflow.png"
+    src="./arquitetura.png"
     alt="FinanceFlow application architecture"
     width="100%"
   />
