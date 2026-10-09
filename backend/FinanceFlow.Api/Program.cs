@@ -14,9 +14,10 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",
-                "http://127.0.0.1:4200"
+                "http://127.0.0.1:4200",
+                "https://feature-transactions.d1fwm662ju2u6z.amplifyapp.com"
             )
-            .WithHeaders("Content-Type")
+            .AllowAnyHeader()
             .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     });
 });
