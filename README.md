@@ -28,24 +28,17 @@ The interface is designed around a modern fintech aesthetic, featuring a dark na
 
 ## 🏗️ Architecture
 
-```text
-┌─────────────────────────────┐
-│       Angular Frontend      │
-│  TypeScript · HTML · SCSS   │
-└──────────────┬──────────────┘
-               │ HTTPS / REST
-               ▼
-┌─────────────────────────────┐
-│       AWS Lambda            │
-│   ASP.NET Core Web API      │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│       Amazon DynamoDB       │
-│   Transaction persistence   │
-└─────────────────────────────┘
-```
+<p align="center">
+  <img
+    src="./financeflow.png"
+    alt="FinanceFlow application architecture"
+    width="100%"
+  />
+</p>
+
+The frontend communicates with the backend through HTTP requests. The backend handles transaction operations and accesses Amazon DynamoDB for persistent storage.
+
+When the API is unavailable, the frontend can use a separate demonstration data source, provided the demo fallback is enabled. Demo data must never be presented as real financial information or sent to the production API.
 
 The frontend communicates with the backend through HTTP requests. The backend handles transaction operations and accesses DynamoDB for persistent storage.
 
